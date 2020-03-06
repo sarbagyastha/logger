@@ -179,11 +179,11 @@ class PrettyPrinter extends LogPrinter {
       if (level == Level.wtf) {
         return AnsiPen()
           ..magenta(bg: true)
-          ..white();
+          ..black();
       } else {
         return AnsiPen()
-          ..red(bg: true)
-          ..white();
+          ..gray(level: 1.0)
+          ..rgb(r: 0.3647, g: 0.18039, b: 0.55686, bg: true);
       }
     } else {
       return AnsiPen();
@@ -216,7 +216,7 @@ class PrettyPrinter extends LogPrinter {
       for (var line in error.split('\n')) {
         buffer.add(color('$verticalLine ') +
                 //errorColor.resetForeground +
-                errorColor(line) //+
+                errorColor(' • $line • ') //+
             //errorColor.resetBackground,
             );
       }

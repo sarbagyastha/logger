@@ -1,4 +1,4 @@
-import 'package:logger/src/printers/simple_printer.dart';
+//import 'package:logger/src/printers/simple_printer.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger(
@@ -29,7 +29,7 @@ void demo() {
 
   loggerNoStack.v({'key': 5, 'value': 'something'});
 
-  loggerNoStack.wtf({'key': 5, 'value': 'something'});
+  loggerNoStack.wtf({'key': 5, 'value': 'something'}, 'Hello');
 
-  Logger(printer: SimplePrinter()..useColor = true).v('boom');
+  loggerNoStack.v('boom', 'Sarbagya');
 }

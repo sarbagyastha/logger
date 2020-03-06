@@ -1,8 +1,6 @@
 /// Small, easy to use and extensible logger which prints beautiful logs.
 library logger;
 
-export 'src/ansi_color.dart';
-
 export 'src/filters/debug_filter.dart';
 export 'src/filters/production_filter.dart';
 

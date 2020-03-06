@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:logger/src/logger.dart';
 import 'package:logger/src/log_printer.dart';
-import 'package:logger/src/ansi_color.dart';
 
 /// Default implementation of [LogPrinter].
 ///
@@ -25,12 +25,12 @@ class PrettyPrinter extends LogPrinter {
   static const singleDivider = '┄';
 
   static final levelColors = {
-    Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
-    Level.debug: AnsiColor.none(),
-    Level.info: AnsiColor.fg(12),
-    Level.warning: AnsiColor.fg(208),
-    Level.error: AnsiColor.fg(196),
-    Level.wtf: AnsiColor.fg(199),
+    Level.verbose: AnsiPen()..gray(level: 0.5),
+    Level.debug: AnsiPen()..blue(),
+    Level.info: AnsiPen()..green(),
+    Level.warning: AnsiPen()..yellow(),
+    Level.error: AnsiPen()..red(),
+    Level.wtf: AnsiPen()..magenta(),
   };
 
   static final levelEmojis = {
@@ -166,23 +166,27 @@ class PrettyPrinter extends LogPrinter {
     }
   }
 
-  AnsiColor _getLevelColor(Level level) {
+  AnsiPen _getLevelColor(Level level) {
     if (colors) {
       return levelColors[level];
     } else {
-      return AnsiColor.none();
+      return AnsiPen();
     }
   }
 
-  AnsiColor _getErrorColor(Level level) {
+  AnsiPen _getErrorColor(Level level) {
     if (colors) {
       if (level == Level.wtf) {
-        return levelColors[Level.wtf].toBg();
+        return AnsiPen()
+          ..magenta(bg: true)
+          ..white();
       } else {
-        return levelColors[Level.error].toBg();
+        return AnsiPen()
+          ..red(bg: true)
+          ..white();
       }
     } else {
-      return AnsiColor.none();
+      return AnsiPen();
     }
   }
 
@@ -210,12 +214,11 @@ class PrettyPrinter extends LogPrinter {
     if (error != null) {
       var errorColor = _getErrorColor(level);
       for (var line in error.split('\n')) {
-        buffer.add(
-          color('$verticalLine ') +
-              errorColor.resetForeground +
-              errorColor(line) +
-              errorColor.resetBackground,
-        );
+        buffer.add(color('$verticalLine ') +
+                //errorColor.resetForeground +
+                errorColor(line) //+
+            //errorColor.resetBackground,
+            );
       }
       buffer.add(color(_middleBorder));
     }

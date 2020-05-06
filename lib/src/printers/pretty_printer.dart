@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:ansicolor/ansicolor.dart';
 import 'package:logger/src/logger.dart';
 import 'package:logger/src/log_printer.dart';
 
@@ -25,12 +24,21 @@ class PrettyPrinter extends LogPrinter {
   static const singleDivider = '┄';
 
   static final levelColors = {
-    Level.verbose: AnsiPen()..gray(level: 0.5),
-    Level.debug: AnsiPen()..blue(),
-    Level.info: AnsiPen()..green(),
-    Level.warning: AnsiPen()..yellow(),
-    Level.error: AnsiPen()..red(),
-    Level.wtf: AnsiPen()..magenta(),
+    Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
+    Level.debug: AnsiColor.none(),
+    Level.info: AnsiColor.fg(12),
+    Level.warning: AnsiColor.fg(208),
+    Level.error: AnsiColor.fg(196),
+    Level.wtf: AnsiColor.fg(199),
+  };
+
+  static final levelPrefix = {
+    Level.verbose: AnsiColor.txt('      '),
+    Level.debug: AnsiColor.txt('DEBUG '),
+    Level.info: AnsiColor.txt('INFO  '),
+    Level.warning: AnsiColor.txt('WARN  '),
+    Level.error: AnsiColor.txt('ERROR  '),
+    Level.wtf: AnsiColor.txt('FATAL  '),
   };
 
   static final levelEmojis = {
@@ -50,6 +58,7 @@ class PrettyPrinter extends LogPrinter {
   final int errorMethodCount;
   final int lineLength;
   final bool colors;
+  final bool prefix;
   final bool printEmojis;
   final bool printTime;
 
@@ -62,6 +71,7 @@ class PrettyPrinter extends LogPrinter {
     this.errorMethodCount = 8,
     this.lineLength = 120,
     this.colors = true,
+    this.prefix = false,
     this.printEmojis = true,
     this.printTime = false,
   }) {
@@ -149,10 +159,10 @@ class PrettyPrinter extends LogPrinter {
     }
 
     var now = DateTime.now();
-    var h = _twoDigits(now.hour);
-    var min = _twoDigits(now.minute);
-    var sec = _twoDigits(now.second);
-    var ms = _threeDigits(now.millisecond);
+    final h = _twoDigits(now.hour);
+    final min = _twoDigits(now.minute);
+    final sec = _twoDigits(now.second);
+    final ms = _threeDigits(now.millisecond);
     var timeSinceStart = now.difference(_startTime).toString();
     return '$h:$min:$sec.$ms (+$timeSinceStart)';
   }
@@ -166,27 +176,31 @@ class PrettyPrinter extends LogPrinter {
     }
   }
 
-  AnsiPen _getLevelColor(Level level) {
+  AnsiColor _getLevelColor(Level level) {
     if (colors) {
       return levelColors[level];
     } else {
-      return AnsiPen();
+      if (prefix) {
+        return levelPrefix[level];
+      } else {
+        return AnsiColor.none();
+      }
     }
   }
 
-  AnsiPen _getErrorColor(Level level) {
+  AnsiColor _getErrorColor(Level level) {
     if (colors) {
       if (level == Level.wtf) {
-        return AnsiPen()
-          ..magenta(bg: true)
-          ..black();
+        return levelColors[Level.wtf].toBg();
       } else {
-        return AnsiPen()
-          ..gray(level: 1.0)
-          ..rgb(r: 0.3647, g: 0.18039, b: 0.55686, bg: true);
+        return levelColors[Level.error].toBg();
       }
     } else {
-      return AnsiPen();
+      if (prefix) {
+        return levelPrefix[level];
+      } else {
+        return AnsiColor.none();
+      }
     }
   }
 
@@ -205,20 +219,16 @@ class PrettyPrinter extends LogPrinter {
     String error,
     String stacktrace,
   ) {
-    // This code is non trivial and a type annotation here helps understanding.
-    // ignore: omit_local_variable_types
-    List<String> buffer = [];
+    final buffer = <String>[];
     var color = _getLevelColor(level);
     buffer.add(color(_topBorder));
 
     if (error != null) {
       var errorColor = _getErrorColor(level);
       for (var line in error.split('\n')) {
-        buffer.add(color('$verticalLine ') +
-                //errorColor.resetForeground +
-                errorColor(' • $line • ') //+
-            //errorColor.resetBackground,
-            );
+        buffer.add(
+          color('$verticalLine ') + errorColor.resetForeground + errorColor(line) + errorColor.resetBackground,
+        );
       }
       buffer.add(color(_middleBorder));
     }
@@ -242,4 +252,73 @@ class PrettyPrinter extends LogPrinter {
 
     return buffer;
   }
+}
+
+class AnsiColor {
+  /// ANSI Control Sequence Introducer, signals the terminal for new settings.
+  static const ansiEsc = '\x1B[';
+
+  /// Reset all colors and options for current SGRs to terminal defaults.
+  static const ansiDefault = '${ansiEsc}0m';
+
+  final int fg;
+  final int bg;
+  final bool color;
+  final String prefix;
+
+  AnsiColor.none()
+      : fg = null,
+        bg = null,
+        color = false,
+        prefix = '';
+
+  AnsiColor.fg(this.fg)
+      : bg = null,
+        color = true,
+        prefix = '';
+
+  AnsiColor.bg(this.bg)
+      : fg = null,
+        color = true,
+        prefix = '';
+
+  AnsiColor.txt(this.prefix)
+      : fg = null,
+        bg = null,
+        color = false;
+
+  @override
+  String toString() {
+    if (color) {
+      if (fg != null) {
+        return '${ansiEsc}38;5;${fg}m';
+      } else if (bg != null) {
+        return '${ansiEsc}48;5;${bg}m';
+      } else {
+        return '';
+      }
+    } else {
+      return prefix;
+    }
+  }
+
+  String call(String msg) {
+    if (color) {
+      return '${this}$msg$ansiDefault';
+    } else {
+      return '${this}$msg';
+    }
+  }
+
+  AnsiColor toFg() => AnsiColor.fg(bg);
+
+  AnsiColor toBg() => AnsiColor.bg(fg);
+
+  /// Defaults the terminal's foreground color without altering the background.
+  String get resetForeground => color ? '${ansiEsc}39m' : '';
+
+  /// Defaults the terminal's background color without altering the foreground.
+  String get resetBackground => color ? '${ansiEsc}49m' : '';
+
+  static int grey(double level) => 232 + (level.clamp(0.0, 1.0) * 23).round();
 }

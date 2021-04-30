@@ -24,7 +24,7 @@ class PrettyPrinter extends LogPrinter {
   static const doubleDivider = '─';
   static const singleDivider = '┄';
 
-  static final levelColors = {
+  Map<Level, AnsiColor> levelColors = {
     Level.verbose: AnsiColor.fg(AnsiColor.grey(0.5)),
     Level.debug: AnsiColor.none(),
     Level.info: AnsiColor.fg(12),
@@ -33,7 +33,7 @@ class PrettyPrinter extends LogPrinter {
     Level.wtf: AnsiColor.fg(199),
   };
 
-  static final levelEmojis = {
+  Map<Level, String> levelEmojis = {
     Level.verbose: '',
     Level.debug: '🐛 ',
     Level.info: '💡 ',

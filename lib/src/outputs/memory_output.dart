@@ -5,8 +5,13 @@ import 'package:logger/src/log_output.dart';
 
 /// Buffers [OutputEvent]s.
 class MemoryOutput extends LogOutput {
+  /// Maximum events in [buffer].
   final int bufferSize;
-  final LogOutput secondOutput;
+
+  /// A secondary [LogOutput] to also received events.
+  final LogOutput? secondOutput;
+
+  /// The buffer of events.
   final ListQueue<OutputEvent> buffer;
 
   MemoryOutput({this.bufferSize = 20, this.secondOutput})
@@ -20,8 +25,6 @@ class MemoryOutput extends LogOutput {
 
     buffer.add(event);
 
-    if (secondOutput != null) {
-      secondOutput.output(event);
-    }
+    secondOutput?.output(event);
   }
 }

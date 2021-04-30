@@ -1,6 +1,11 @@
 # Logger
 
-[![Travis](https://img.shields.io/travis/com/leisim/logger/master.svg)](https://travis-ci.com/leisim/logger) [![Version](https://img.shields.io/pub/v/logger.svg)](https://pub.dev/packages/logger) ![Runtime](https://img.shields.io/badge/dart-%3E%3D2.1-brightgreen.svg) ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)
+[![pub package](https://img.shields.io/pub/v/logger.svg?logo=dart&logoColor=00b9fc)](https://pub.dartlang.org/packages/logger)
+[![CI](https://img.shields.io/github/workflow/status/leisim/logger/Dart%20CI/master?logo=github-actions&logoColor=white)](https://github.com/leisim/logger/actions)
+[![Last Commits](https://img.shields.io/github/last-commit/leisim/logger?logo=git&logoColor=white)](https://github.com/leisim/logger/commits/master)
+[![Pull Requests](https://img.shields.io/github/issues-pr/leisim/logger?logo=github&logoColor=white)](https://github.com/leisim/logger/pulls)
+[![Code size](https://img.shields.io/github/languages/code-size/leisim/logger?logo=github&logoColor=white)](https://github.com/leisim/logger)
+[![License](https://img.shields.io/github/license/leisim/logger?logo=open-source-initiative&logoColor=green)](https://github.com/leisim/logger/blob/master/LICENSE)
 
 Small, easy to use and extensible logger which prints beautiful logs.<br>
 Inspired by [logger](https://github.com/orhanobut/logger) for Android.
@@ -29,7 +34,9 @@ Instead of a string message, you can also pass other objects like `List`, `Map` 
 
 ## Log Console
 
-If you are creating a Flutter app, you can use the [logger_flutter](#logger-flutter-extension) extension. Shake the phone to show an on device console. 
+If you are creating a Flutter app, you can use the [logger_flutter](https://pub.dev/packages/logger_flutter) extension.<br>
+Shake the phone or call `LogConsole.open(context)` from anywhere to show an on device console.<br>
+For more info, [click here](https://pub.dev/packages/logger_flutter).
 
 | ![](https://raw.githubusercontent.com/leisim/logger/master/art/log_console_light.png) | ![](https://raw.githubusercontent.com/leisim/logger/master/art/log_console_dark.png) |
 |---|---|
@@ -86,14 +93,23 @@ var logger = Logger(
     printEmojis: true, // Print an emoji for each log message
     printTime: false // Should each log print contain a timestamp
   ),
-)
+);
 ```
 
+### Auto detecting
+
+With the `io` package you can auto detect the `lineLength` and `colors` arguments. 
+Assuming you have imported the `io` package with `import 'dart:io' as io;` you 
+can auto detect `colors` with `io.stdout.supportsAnsiEscapes` and `lineLength` 
+with `io.stdout.terminalColumns`.
+
+You should probably do this unless there's a good reason you don't want to 
+import `io`, for example when using this library on the web.
 
 ## LogFilter
 
 The `LogFilter` decides which log events should be shown and which don't.<br>
-The default implementation (`DebugFilter`) shows all logs with `level >= Logger.level` while in debug mode. In release mode all logs are omitted.
+The default implementation (`DevelopmentFilter`) shows all logs with `level >= Logger.level` while in debug mode. In release mode all logs are omitted.
 
 You can create your own `LogFilter` like this:
 ```dart
@@ -124,6 +140,22 @@ class MyPrinter extends LogPrinter {
 
 If you created a cool `LogPrinter` which might be helpful to others, feel free to open a pull request. :)
 
+### Colors
+
+Please note that all IDEs (VSCode, XCode, Android Studio, IntelliJ) do not 
+support ANSI escape sequences in their terminal outputs. These escape sequences 
+are used to color output. If using such an IDE do not configure colored output.
+
+However, if you are using a JetBrains IDE (Android Studio, IntelliJ, etc.) 
+you can make use of the [Grep Console Plugin](https://plugins.jetbrains.com/plugin/7125-grep-console)
+and the [`PrefixPrinter`](/lib/src/printers/prefix_printer.dart) 
+decorator to achieved colored logs for any logger:
+
+```dart
+var logger = Logger(
+  printer: PrefixPrinter(PrettyPrinter(colors: false))
+);
+```
 
 ## LogOutput
 
@@ -148,16 +180,6 @@ Possible future `LogOutput`s could send to a file, firebase or to Logcat. Feel f
 
 The [logger_flutter](https://pub.dev/packages/logger_flutter) package is an extension for logger. You can add it to any Flutter app. Just shake the phone to show the console.
 
-1. [Add logger_flutter](https://pub.dev/packages/logger_flutter#-installing-tab-) to your `pubspec.yaml`
-2. Add the following code into your widget tree
-
-```dart
-LogConsoleOnShake(
-  child: Container() // Your widgets
-),
-```
-
-More documentation coming soon.
 
 ## MIT License
 ```

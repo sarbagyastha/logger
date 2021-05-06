@@ -223,15 +223,7 @@ class PrettyPrinter extends LogPrinter {
   }
 
   AnsiColor _getErrorColor(Level level) {
-    if (colors) {
-      if (level == Level.wtf) {
-        return levelColors[Level.wtf]!.toBg();
-      } else {
-        return levelColors[Level.error]!.toBg();
-      }
-    } else {
-      return AnsiColor.none();
-    }
+    return AnsiColor.none();
   }
 
   String _getEmoji(Level level) {

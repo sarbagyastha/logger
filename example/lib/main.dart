@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 final logger = Logger(
-  printer: PrettyPrinter(colors: false, prefix: true),
+  printer: PrettyPrinter(colors: true),
 );
 
 final loggerNoStack = Logger(
-  printer: PrettyPrinter(methodCount: 0, colors: false, prefix: true),
+  printer: PrettyPrinter(methodCount: 0, colors: true),
 );
 
 void main() {

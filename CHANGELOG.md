@@ -1,3 +1,6 @@
+## 1.1.1
+- Updated error message color to always white.
+
 ## 1.0.0
 - Stable nullsafety
 
